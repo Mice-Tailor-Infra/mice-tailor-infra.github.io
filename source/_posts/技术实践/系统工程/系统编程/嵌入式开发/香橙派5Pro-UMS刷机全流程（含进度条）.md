@@ -5,6 +5,8 @@ tags:
   - RK3588
   - U-Boot
   - UMS
+  - NoMachine
+  - Headless
   - 刷机
   - dd
   - pv
@@ -120,7 +122,40 @@ sync
 
 先执行裸 `ums` 看帮助，再按板子实际存储介质改 `devtype`。
 
-## 七、简记（速查版）
+## 七、无显示器完成首启 OOBE（串口 + NoMachine）
+
+你这个思路是可行的，尤其是像 `joshua-riek` 这类镜像首启会进 Ubuntu 图形初始化向导（OOBE）时。
+
+核心思路：
+
+1. 串口先登录系统（通常能拿到 root shell）。
+2. 确保板子可联网（你说的 Arch 共享网络就很好用）。
+3. 临时安装 NoMachine，并给 root 设密码。
+4. 在 Arch 上用 NoMachine 客户端连上板子，进入图形会话。
+5. 在图形界面完成 Ubuntu 首启创建用户流程。
+
+可参考命令：
+
+```bash
+# 串口登录后（Ubuntu）
+apt update
+apt install -y wget
+wget https://download.nomachine.com/download/8.16/Arm/nomachine_8.16.1_1_arm64.deb
+apt install -y ./nomachine_8.16.1_1_arm64.deb
+passwd root
+systemctl restart nxserver
+ip a
+```
+
+然后在 Arch 主机打开 NoMachine，连接板子 IP（默认 4000 端口）。
+
+安全提醒（建议写进流程）：
+
+- 这个方法建议只在“首启救急”场景临时使用。
+- 完成 OOBE 后，建议立刻禁用 root 远程登录，改为普通用户 + sudo。
+- 如果后续不用 NoMachine，建议卸载或至少停用服务。
+
+## 八、简记（速查版）
 
 串口侧：
 
